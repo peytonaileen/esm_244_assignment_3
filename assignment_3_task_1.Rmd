@@ -2,11 +2,14 @@
 title: 'Assignment 3: Task 1'
 author: "Peyton Moore"
 date: "2/21/2021"
-output: html_document
+output: 
+  html_document:
+    code_folding: hide
+    theme: cosmo
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = FALSE, warning = FALSE, include = FALSE)
 ```
 
 
@@ -39,22 +42,23 @@ oil_spill %>%
 ```{r}
 #plot the counties 
 
-ggplot(data = counties) +
-  geom_sf(aes(fill = land_area), color = "white", size = 0.1) +
-  theme_void() +
-  scale_fill_gradientn(colors = c("cyan","blue","purple"))
+# ggplot(data = counties) +
+#   geom_sf(aes(fill = land_area), color = "white", size = 0.1) +
+#   theme_void() +
+#   scale_fill_gradientn(colors = c("cyan","blue","purple"))
 
 
 #plot the oil spills
 
-ggplot(data = oil_spill)+
-  geom_sf()+
-  theme_void()
+# ggplot(data = oil_spill)+
+#   geom_sf()+
+#   theme_void()
 
 ```
-### Part 1: Interactive tmap 
 
-```{r}
+### Part 1: Interactive tmap of oil spill locations across California
+
+```{r, include = TRUE}
 #map these together
 
 tmap_mode(mode = "view")
@@ -62,6 +66,30 @@ tmap_mode(mode = "view")
 tm_shape(counties)+
   tm_borders("darkolivegreen3")+
   tm_shape(oil_spill)+
-  tm_dots(alpha = 0.5)
+  tm_dots(alpha = 0.3, col = "darkgoldenrod2", border.col = "darkgoldenrod2", border.alpha = 1)
+```
+
+### Chloropath map 
+
+```{r, include = TRUE}
+# filter out marine oil spills
+oil_spill %>% 
+  filter(INLANDMARI == "Inland")
+
+#join the oil spill data with the counties data
+oil_counties_join <- counties %>% 
+  st_join(oil_spill)
+
+# count the number of oil spills in each county 
+chloro_oil <- oil_counties_join%>% 
+  count(county_name)
+
+# plot these with ggplot 
+ggplot(data = chloro_oil) +
+  geom_sf(aes(fill = n), color = "white", size = 0.1) +
+  scale_fill_gradientn(colors = c("gold","darkorange","firebrick")) +
+  theme_void() +
+  labs(fill = "Number of Oil Spills", 
+       title = "Number of Oil Spills by County in 2008")
 ```
 
