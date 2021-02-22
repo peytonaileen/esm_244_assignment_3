@@ -1,0 +1,35 @@
+---
+title: 'Assignment 3: Task 2'
+author: "Peyton Moore"
+date: "2/22/2021"
+output: 
+  html_document:
+    code_folding: hide
+    theme: cosmo
+---
+
+```{r setup, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = FALSE, warning = FALSE, include = FALSE)
+
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+library(tmap)
+library(gstat)
+library(stars)
+library(raster)
+```
+
+
+```{r}
+
+
+my_files <- list.files(path = here("data", "ca_cetaceans"), full.names = TRUE)
+
+
+cetacean_data <- raster::stack(my_files)
+
+plot(cetacean_data)
+```
+
