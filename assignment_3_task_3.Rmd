@@ -1,0 +1,46 @@
+---
+title: 'Assignment 3: Task 3'
+author: "Peyton Moore"
+date: "2/24/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(tidytext)
+library(textdata)
+library(pdftools)
+library(ggwordcloud)
+```
+
+```{r, cache=TRUE}
+bey_albums <- pdf_text(here("data", "Beyonce_lyrics.pdf"))
+
+
+bey_tidy <- data.frame(bey_albums)%>% 
+  mutate(bey_albums = str_split(bey_albums, pattern = '\\n')) %>% 
+  unnest(bey_albums) %>% 
+  mutate(bey_albums = str_squish(bey_albums))
+
+bey_songs <- bey_tidy %>% 
+  mutate(album = case_when(
+    str_detect(bey_albums, "Album:") ~ bey_albums,
+    TRUE ~ NA_character_
+  ))%>% 
+  fill(album) %>% 
+  mutate(album = str_replace(album, pattern = "Album:", replacement = "")) %>% 
+  filter(str_detect(bey_albums,pattern = "Album:", negate = TRUE))# %>% 
+  # mutate(song = case_when(
+  #   str_detect(bey_albums, pattern = c("1.", "2.", "3.")) ~ bey_albums,
+  #   TRUE ~ NA_character_
+  # ))
+
+bey_tokens <- bey_songs %>% 
+  unnest_tokens(word, bey_albums)
+```
+
