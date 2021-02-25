@@ -126,3 +126,30 @@ yonce_graph <- ggplot(data = yonce, aes(label =word))+
 yonce_graph
 ```
 
+
+### Sentiment analysis 
+
+
+```{r, include = TRUE, results='hide'}
+get_sentiments(lexicon = "afinn")
+
+bey_afinn <- bey_tokens %>% 
+  inner_join(get_sentiments("afinn"))
+
+
+afinn_counts <- bey_afinn %>% 
+  count(album, value)
+    
+ggplot(data = afinn_counts, aes(x = value, y = n)) +
+  geom_col(aes(fill = value), 
+           show.legend = FALSE)+
+  scale_fill_gradient(low = "darkorange", high = "turquoise4")+
+  facet_wrap(~album)+
+  theme_minimal()+
+  labs(y = "Number of words", 
+       x = "Value (Afinn Lexicon)", 
+       title = "Sentiment Analysis of Beyonce's Albums")
+
+
+```
+
