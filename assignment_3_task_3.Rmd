@@ -2,22 +2,30 @@
 title: 'Assignment 3: Task 3'
 author: "Peyton Moore"
 date: "2/24/2021"
-output: html_document
+output:  
+  html_document:
+    code_folding: hide
+    theme: cosmo
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = FALSE, warning = FALSE, include = FALSE)
 ```
 
 
+### Beyonce Album Analysis 
+
 ```{r}
 library(tidyverse)
+library(here)
 library(tidytext)
 library(textdata)
 library(pdftools)
 library(ggwordcloud)
 ```
 
+
+**Data:** https://www.beyonce.com/album/
 ```{r, cache=TRUE}
 bey_albums <- pdf_text(here("data", "Beyonce_lyrics.pdf"))
 
@@ -41,6 +49,80 @@ bey_songs <- bey_tidy %>%
   # ))
 
 bey_tokens <- bey_songs %>% 
-  unnest_tokens(word, bey_albums)
+  unnest_tokens(word, bey_albums) %>% 
+  anti_join(stop_words) %>% 
+  count(album, word) %>% 
+  mutate(word = str_trim(word),
+         album = str_trim(album),
+         album = tolower(album), 
+         word = tolower(word)) %>% 
+  filter(word != "I'm", 
+         word != "can't", 
+         word != "ain’t", 
+         word != "i’m",
+         word != "don't", 
+         word != "don’t")
+
+bey_top_5 <- bey_tokens%>% 
+  group_by(album) %>% 
+  arrange(-n) %>% 
+  slice(1:5)  
+```
+
+
+```{r}
+
+top_words <- bey_tokens %>% 
+  arrange(-n)
+
+yonce <- top_words %>%
+  filter(album != "lemonade")%>% 
+  arrange(-n) %>% 
+  slice(1:50)
+
+lemon <- top_words %>% 
+  filter(album == "lemonade")%>% 
+  arrange(-n) %>% 
+  slice(1:50)
+  
+
+bey_cloud <- ggplot(data = top_words, aes(label =word))+
+  geom_text_wordcloud(aes(color = n, 
+                          size = n), 
+                      shape = "diamond")+
+  scale_size_area(max_size = 6)+
+  theme_minimal()+
+  facet_wrap(~album)
+
+
+bey_cloud
+```
+
+### Lemonade Word Cloud
+
+```{r, include = TRUE}
+lemon_graph <- ggplot(data = lemon, aes(label =word))+
+  geom_text_wordcloud(aes(color = n, 
+                          size = n), 
+                      shape = "diamond")+
+  scale_size_area(max_size = 6)+
+  scale_color_gradient(low = "darkorange", high = "turquoise4")+
+  theme_minimal()
+
+lemon_graph
+```
+
+### Beyonce Word Cloud
+
+```{r, include = TRUE}
+yonce_graph <- ggplot(data = yonce, aes(label =word))+
+  geom_text_wordcloud(aes(color = n, 
+                          size = n), 
+                      shape = "diamond")+
+  scale_size_area(max_size = 6)+
+  scale_color_gradient(low = "darkorange", high = "turquoise4")+
+  theme_minimal()
+
+yonce_graph
 ```
 
